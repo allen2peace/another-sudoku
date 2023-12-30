@@ -1,0 +1,8 @@
+.row:first-child .field,
+.row:nth-child(3n) {
+  border-top: 3px solid rgb(153, 4, 4);
+}
+
+.row:nth-child(3n) .field {
+  border-bottom: 3px solid rgb(153, 4, 4);
+}
