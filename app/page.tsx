@@ -1,133 +1,26 @@
 "use client"
-import Image from 'next/image'
 import React from "react";
+import Router, { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from "react";
-import { DifficultyLevel, Board } from "./constants and types/types";
-
-import {
-  prepareBoard,
-  isBoardCorrectlyCompleted,
-  findEmpty,
-} from "./logic/functions";
-import { useTimer } from "./hooks/useTimer";
-import Stopwatch from "./components/StopWatch";
-import Rows from "./components/Rows";
-import PauseModal from "./components/PauseModal";
-import GameOverModal from "./components/GameOverModal";
-import { exampleSudokuSolution } from "./constants and types/constants";
+import LoadingPage from './components/Loading';
 
 export default function Home() {
-  
-  const [board, setBoard] = useState(() =>
-  prepareBoard(exampleSudokuSolution, "easy")
-);
-const [paused, setPaused] = useState(false);
-const [editableFields, setEditableFields] = useState(() => findEmpty(board));
-const timer = useTimer();
-const [difficultyLevel, setDifficultyLevel] =
-  useState<DifficultyLevel>("easy");
 
-const boardCompleted = useMemo(
-  () => isBoardCorrectlyCompleted(board),
-  [board]
-);
+  const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  if (boardCompleted) {
-    timer.pauseTimer();
+  const gameId = Date.now() + Math.floor(Math.random() * 1000); // 例如：1577854800000146
+  // console.log("gameId = "+gameId +", "+Math.random())
+  const router = useRouter()
+
+  useEffect(() => {
+    // 模拟数据加载
+    // setTimeout(() => {
+    setIsLoading(false);
+    // }, 100);
+  }, [])
+
+  if (!isLoading) {
+    router.push(`/game/${gameId}`)
   }
-}, [board]);
-
-const isCellEditable = (index: number): boolean =>
-  editableFields.includes(index);
-
-const handleChange = (index: number, value: string): void => {
-  const copy = [...board];
-  const parsedValue: number = parseInt(value);
-
-  copy[index] = isNaN(parsedValue) ? "" : parsedValue;
-
-  setBoard(copy);
-};
-
-const changeDifficulty = (
-  board: Board,
-  exampleSudokuSolution: number[],
-  level
-): ("" | number)[] => {
-  let boardWithChangedDifficultyLevel: ("" | number)[] = prepareBoard(
-    exampleSudokuSolution,
-    level
-  );
-  setBoard(boardWithChangedDifficultyLevel);
-  setEditableFields(findEmpty(boardWithChangedDifficultyLevel));
-  timer.reset();
-  handleStart();
-  return board;
-};
-
-const handleNewGame = () =>
-  changeDifficulty(board, exampleSudokuSolution, difficultyLevel);
-
-const handleStart = (): void => {
-  timer.startTimer();
-  setPaused(false);
-};
-
-const handlePause = (): void => {
-  timer.pauseTimer();
-  setPaused(true);
-};
-
-const handleChangeDifficulty = (difficulty: DifficultyLevel) => {
-  changeDifficulty(board, exampleSudokuSolution, difficulty);
-  setDifficultyLevel(difficulty);
-};
-
-return (
-  
-  <>
-    <div className="py-[15vh] sm:py-[20vh] container flex flex-col items-center justify-center" >
-      <h1 className="header">Sudoku Game</h1>
-      <div className="difficultyLevelAndTimerContainer">
-        <div className="difficultyLevel">
-          <label>Difficulty level: </label>
-          <select className="select"
-            onChange={(e) => {
-              handleChangeDifficulty(e.target.value);
-            }}
-          >
-            <option value="easy">Easy </option>
-            <option value="medium">Medium </option>
-            <option value="hard">Hard </option>
-          </select>
-        </div>
-        <Stopwatch
-          onPause={handlePause}
-          onStart={handleStart}
-          time={timer.time}
-          isActive={timer.isActive}
-          boardCompleted={boardCompleted}
-        />
-      </div>
-      <div className="board">
-      {boardCompleted && (
-      <GameOverModal onClick={handleNewGame} solutionTime={timer.time} />
-    )}
-        {boardCompleted && <div className="overlay"></div>}
-        {paused && <PauseModal onStart={handleStart} />}
-        <table>
-          <tbody>
-            <Rows
-              board={board}
-              onChange={handleChange}
-              isCellEditable={isCellEditable}
-            />
-          </tbody>
-        </table>
-      </div>
-    </div>
-   
-  </>
-);
+  return <LoadingPage />;
 }

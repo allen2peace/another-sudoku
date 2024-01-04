@@ -224,7 +224,7 @@ function getFieldInColumnsToColor(
   }
 }
 
-const getFieldsInSquaresToColor = (i) => {
+const getFieldsInSquaresToColor = (i: number) => {
   const squareCol = Math.floor((i % 9) / 3);
   const squareRow = Math.floor(i / 27);
   return squareCol + squareRow * 3;
