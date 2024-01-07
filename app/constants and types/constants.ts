@@ -13,7 +13,7 @@ export const exampleSudokuSolution: number[] = [
   ];
 
 export const numberOfClearedFieldsForDifficulty: Record<any, number> = {
-  easy: 10,
-  medium: 18,
-  hard: 28,
+  easy: 15,
+  medium: 25,
+  hard: 40,
 };

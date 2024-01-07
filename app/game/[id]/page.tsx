@@ -65,22 +65,26 @@ export default function GamePage() {
     }, [stepRecord]);
 
     const addStepRecordToDB = async () => {
-        const res = await fetch('/api/step-create', {
+        await fetch('/api/step-create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ "infoId": gameInfoDbId, "stepRecord": stepRecord })
-        }).then().catch(error => {
+        }).then(res => {
+            res.json().then(
+                it => {
+                    console.log("addStepRecordToDB data.stepId= " + it.stepId)
+                    currentStepId = it.stepId
+                    if (originStepId == 0) {
+                        originStepId = it.stepId
+                    }
+                }
+            )
+
+        }).catch(error => {
             console.log("fetch error " + error)
         });
-
-        const data = await res.json();
-        console.log("addStepRecordToDB data.stepId= " + data.stepId)
-        currentStepId = data.stepId
-        if(originStepId == 0){
-            originStepId = data.stepId
-        }
     }
 
     useEffect(() => {
@@ -133,12 +137,12 @@ export default function GamePage() {
         changeDifficulty(board, exampleSudokuSolution, difficultyLevel);
 
     const handlePreStep = async () => {
-        console.log("handlePreStep start currentStepId="+currentStepId+", originStepId="+originStepId)
-        if(currentStepId <= 0) {
+        console.log("handlePreStep start currentStepId=" + currentStepId + ", originStepId=" + originStepId)
+        if (currentStepId <= 0) {
             console.log("handlePreStep currentStepId 不合规 return")
             return
         }
-        if(currentStepId < originStepId) {
+        if (currentStepId < originStepId) {
             console.log("handlePreStep currentStepId 到达本次游戏边界 return")
             return
         }
@@ -148,29 +152,50 @@ export default function GamePage() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ "stepId": currentStepId })
-        }).then().catch(error => {
-            console.log("fetch error " + error)
-        });
+        }).then(res => {
+            res.json().then(
+                it => {
+                    console.log("handlePreStep await data.data=" + it?.data + ", currentStepId" + currentStepId)
+                    if (it?.data === null) return
+                    console.log("handlePreStep response= " + it.data.id + ", now=" + it.data.valueNow + ", pre=" + it.data.valuePre + ", y=" + it.data.coordY)
 
-        const data = await response.json();
-        console.log("handlePreStep await data.data="+data?.data+", currentStepId"+currentStepId)
-        if(data?.data === null) return
-        console.log("handlePreStep response= " + data.data.id+", now="+data.data.valueNow+", pre="+data.data.valuePre+", y="+data.data.coordY)
+                    const index = it.data.coordY
+                    const value = it.data.valuePre
+                    const copy = [...board];
+                    const parsedValue: number = parseInt(value);
+                    copy[index] = isNaN(parsedValue) ? "" : parsedValue;
+                    if (parsedValue == 0) {
+                        copy[index] = ""
+                    }
+                    setBoard(copy);
+                    currentStepId--
+                }
+            )
 
-        const index = data.data.coordY
-        const value = data.data.valuePre
-        const copy = [...board];
-        const parsedValue: number = parseInt(value);
-        copy[index] = isNaN(parsedValue) ? "" : parsedValue;
-        if(parsedValue == 0) {
-            copy[index] = ""
-        }
-        setBoard(copy);
-        currentStepId--
+        })
+            .catch(error => {
+                console.log("fetch error " + error)
+            });
+
+        // const data = await response.json();
+        // console.log("handlePreStep await data.data=" + data?.data + ", currentStepId" + currentStepId)
+        // if (data?.data === null) return
+        // console.log("handlePreStep response= " + data.data.id + ", now=" + data.data.valueNow + ", pre=" + data.data.valuePre + ", y=" + data.data.coordY)
+
+        // const index = data.data.coordY
+        // const value = data.data.valuePre
+        // const copy = [...board];
+        // const parsedValue: number = parseInt(value);
+        // copy[index] = isNaN(parsedValue) ? "" : parsedValue;
+        // if (parsedValue == 0) {
+        //     copy[index] = ""
+        // }
+        // setBoard(copy);
+        // currentStepId--
     }
 
-    const handleNextStep = async() => {
-        if(currentStepId <= 0) {
+    const handleNextStep = async () => {
+        if (currentStepId <= 0) {
             console.log("handleNextStep currentStepId 不合规 return")
             return
         }
@@ -179,26 +204,28 @@ export default function GamePage() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ "stepId": currentStepId+1 })
-        }).then().catch(error => {
+            body: JSON.stringify({ "stepId": currentStepId + 1 })
+        }).then(res => {
+            res.json().then(
+                data => {
+                    // const data = await response.json();
+                    if (data?.data === null) return
+                    console.log("handlePreStep response= " + data?.data?.id + ", now=" + data?.data?.valueNow + ", pre=" + data?.data?.valuePre + ", y=" + data?.data?.coordY)
+
+                    const index = data.data.coordY
+                    const value = data.data.valueNow
+                    const copy = [...board];
+                    const parsedValue: number = parseInt(value);
+                    copy[index] = isNaN(parsedValue) ? "" : parsedValue;
+                    if (parsedValue == 0) {
+                        copy[index] = ""
+                    }
+                    setBoard(copy);
+                    currentStepId++
+                })
+        }).catch(error => {
             console.log("fetch error " + error)
         });
-
-        
-        const data = await response.json();
-        if(data?.data === null) return
-        console.log("handlePreStep response= " + data?.data?.id+", now="+data?.data?.valueNow+", pre="+data?.data?.valuePre+", y="+data?.data?.coordY)
-
-        const index = data.data.coordY
-        const value = data.data.valueNow
-        const copy = [...board];
-        const parsedValue: number = parseInt(value);
-        copy[index] = isNaN(parsedValue) ? "" : parsedValue;
-        if(parsedValue == 0) {
-            copy[index] = ""
-        }
-        setBoard(copy);
-        currentStepId++
     }
 
     const handleStart = (): void => {
@@ -233,22 +260,26 @@ export default function GamePage() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(gameData)
-        }).then().catch(error => {
+        }).then(res => {
+            res.json().then(
+                data => { 
+                    console.log("saveSudokuGameToDB response= " + response)
+
+                    // const data = await response.json();
+                    console.log("saveSudokuGameToDB data.id= " + data.id)
+                    gameInfoDbId = data.id
+                    console.log("call create dbId= " + gameInfoDbId)
+                    if (data.id) {
+                        // Router.push(`/game/${data.id}`);
+                        // const router = useRouter()
+                        // router.push("/");
+                        // redirect(`/game/${data.id}`)
+                        // redirect("/game/19")
+                    }            
+                })
+        }).catch(error => {
             console.log("fetch error " + error)
         });
-        console.log("saveSudokuGameToDB response= " + response)
-
-        const data = await response.json();
-        console.log("saveSudokuGameToDB data.id= " + data.id)
-        gameInfoDbId = data.id
-        console.log("call create dbId= " + gameInfoDbId)
-        if (data.id) {
-            // Router.push(`/game/${data.id}`);
-            // const router = useRouter()
-            // router.push("/");
-            // redirect(`/game/${data.id}`)
-            // redirect("/game/19")
-        }
     };
 
     return (

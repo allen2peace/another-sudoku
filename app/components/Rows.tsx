@@ -11,7 +11,7 @@ type RowsProps = {
 };
 
 const Rows: React.FC<RowsProps> = ({ board, onChange, isCellEditable }) => {
-  const [selectedIndex, setSelectedIndex] = useState(undefined);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const rows: JSX.Element[] = [];
   for (let i: number = 0; i < board.length; i += 9) {

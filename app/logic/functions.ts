@@ -115,10 +115,11 @@ export function isRowCorrectlyFilled(board: Board, row: number): boolean {
   let usedNumbers: (number | "")[] = [];
 
   for (let i: number = row; i < row + 9; i++) {
+    // const temp = if(board[i])
     if (
       board[i] === "" ||
-      board[i] <= 0 ||
-      board[i] > 9 ||
+      parseInt(board[i].toString()) <= 0 ||
+      parseInt(board[i].toString()) > 9 ||
       usedNumbers.includes(board[i])
     ) {
       return false;
@@ -135,8 +136,8 @@ export function isColumnCorrectlyFilled(board: Board, column: number): boolean {
   for (let i: number = column; i < column + 73; i += 9) {
     if (
       board[i] === "" ||
-      board[i] <= 0 ||
-      board[i] > 9 ||
+      parseInt(board[i].toString()) <= 0 ||
+      parseInt(board[i].toString()) > 9 ||
       usedNumbers.includes(board[i])
     ) {
       return false;
@@ -222,6 +223,7 @@ function getFieldInColumnsToColor(
   if (selectedIndex - i === j || selectedIndex + i === j) {
     return true;
   }
+  return false
 }
 
 const getFieldsInSquaresToColor = (i: number) => {

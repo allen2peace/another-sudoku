@@ -15,7 +15,7 @@ const PrefilledField: React.FC<PrefilledFieldProps> = ({
   onSelect,
 }) => (
   <input
-    readonly
+    readOnly
     className="uneditableField"
     value={value}
     onClick={() => {
