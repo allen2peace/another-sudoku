@@ -1,8 +1,10 @@
 // /api/sudoku.js
-import { PrismaClient } from "@prisma/client";
-import { NextRequest, NextResponse } from "next/server";
+import { GameStepRecordBean } from "@/app/constants and types/types";
+import { prisma } from "@/app/lib/db";
+import { NextResponse } from "next/server";
+import { use } from "react";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   console.log("request.method = "+request.method)
@@ -11,24 +13,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not Allowed..."  }, { status: 400 })
   }
   const bodyData = await request.json()
-  console.log("bodyData = "+JSON.stringify(bodyData))
-
-  
-  // const users = await prisma.sudokuGame.findMany()
-  // console.log("POST findMany = "+users.length)
+  // console.log("update bodyData = "+JSON.stringify(bodyData))
+  console.log("update bodyData = "+bodyData.infoId+", "+bodyData.stepRecord)
 
   try{
-  // const newGame = await prisma.sudokuGame.create({data:{
-  //   difficulty:"easy",
-  //   board:"easy",
-  //   solved:true,
-  //   // createdAt:now(),
-  //   // updatedAt:Date.now(),
-  // }});
+  // const infoData = await prisma.sudokuInfo.findUnique({
+  //   where:{
+  //     id:bodyData.infoId
+  //   }
+  // })
 
-  const newGame = await prisma.sudokuInfo.create({data:bodyData})
-  console.log("prisma create gameId= "+newGame.gameId)
-  return NextResponse.json({ id: newGame.gameId }, { status: 200 })
+  // console.log("get infoData: "+infoData?.id +", "+infoData?.gameId)
+  // const data = await prisma.stepRecord.findUnique({
+  //   where:{
+  //     id:1
+  //   }
+  // })
+  // console.log("POST findUnique before "+data?.id+", "+data?.sudokuInfoId)
+
+  const stepRecord = await prisma.stepRecord.create({
+    data: bodyData.stepRecord
+  })
+
+  // const data2 = await prisma.stepRecord.findUnique({
+  //   where:{
+  //     id:bodyData.id
+  //   }
+  // })
+  // console.log("POST findUnique after "+data2?.id+", "+data2?.sudokuInfoId)
+
+  console.log("prisma after create record "+stepRecord.id+", "+stepRecord.sudokuInfoId)
+  return NextResponse.json({"stepId":stepRecord.id},{ status: 200 })
   } catch(error){
     console.error('创建数据时发生错误:', error);
   }

@@ -11,9 +11,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Suduku {
-  id              String   @id
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  isPass          Boolean  @default(false)
+model SudokuInfo {
+  id         Int          @id @default(autoincrement())
+  gameId     String // 游戏id
+  difficulty String // 难度等级，例如：'easy', 'medium', 'hard'
+  board      String // 数独棋盘的当前状态，可以将二维数组转为JSON字符串后存储
+  solved     Boolean // 当前游戏是否已解决
+  stepRecord StepRecord[] // 步骤记录，如 [[0,0,0,3],[0,0,3,4]]
+  createdAt  DateTime     @default(now()) // 游戏创建的时间
+  updatedAt  DateTime     @updatedAt // 游戏最后更新的时间
+}
+
+//[0,0,0,3]
+model StepRecord {
+  id           Int         @id @default(autoincrement())
+  coordX       Int
+  coordY       Int
+  valuePre     Int
+  valueNow     Int
+  SudokuInfo   SudokuInfo? @relation(fields: [sudokuInfoId], references: [id])
+  sudokuInfoId Int?
 }
