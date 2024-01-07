@@ -24,6 +24,7 @@ export const fetchCache = "force-no-store"
 export const revalidate = 0
 var gameInfoDbId = 0
 var currentStepId = 0
+var originStepId = 0
 
 export default function GamePage() {
     const params = useParams();
@@ -77,6 +78,9 @@ export default function GamePage() {
         const data = await res.json();
         console.log("addStepRecordToDB data.stepId= " + data.stepId)
         currentStepId = data.stepId
+        if(originStepId == 0){
+            originStepId = data.stepId
+        }
     }
 
     useEffect(() => {
@@ -129,8 +133,13 @@ export default function GamePage() {
         changeDifficulty(board, exampleSudokuSolution, difficultyLevel);
 
     const handlePreStep = async () => {
+        console.log("handlePreStep start currentStepId="+currentStepId+", originStepId="+originStepId)
         if(currentStepId <= 0) {
             console.log("handlePreStep currentStepId 不合规 return")
+            return
+        }
+        if(currentStepId < originStepId) {
+            console.log("handlePreStep currentStepId 到达本次游戏边界 return")
             return
         }
         const response = await fetch('/api/query-last-step', {
@@ -142,12 +151,54 @@ export default function GamePage() {
         }).then().catch(error => {
             console.log("fetch error " + error)
         });
-        console.log("handlePreStep response= " + response)
 
+        const data = await response.json();
+        console.log("handlePreStep await data.data="+data?.data+", currentStepId"+currentStepId)
+        if(data?.data === null) return
+        console.log("handlePreStep response= " + data.data.id+", now="+data.data.valueNow+", pre="+data.data.valuePre+", y="+data.data.coordY)
+
+        const index = data.data.coordY
+        const value = data.data.valuePre
+        const copy = [...board];
+        const parsedValue: number = parseInt(value);
+        copy[index] = isNaN(parsedValue) ? "" : parsedValue;
+        if(parsedValue == 0) {
+            copy[index] = ""
+        }
+        setBoard(copy);
+        currentStepId--
     }
 
-    const handleNextStep = () => {
+    const handleNextStep = async() => {
+        if(currentStepId <= 0) {
+            console.log("handleNextStep currentStepId 不合规 return")
+            return
+        }
+        const response = await fetch('/api/query-last-step', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "stepId": currentStepId+1 })
+        }).then().catch(error => {
+            console.log("fetch error " + error)
+        });
 
+        
+        const data = await response.json();
+        if(data?.data === null) return
+        console.log("handlePreStep response= " + data?.data?.id+", now="+data?.data?.valueNow+", pre="+data?.data?.valuePre+", y="+data?.data?.coordY)
+
+        const index = data.data.coordY
+        const value = data.data.valueNow
+        const copy = [...board];
+        const parsedValue: number = parseInt(value);
+        copy[index] = isNaN(parsedValue) ? "" : parsedValue;
+        if(parsedValue == 0) {
+            copy[index] = ""
+        }
+        setBoard(copy);
+        currentStepId++
     }
 
     const handleStart = (): void => {

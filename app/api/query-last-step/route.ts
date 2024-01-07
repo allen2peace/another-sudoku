@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   }
   const bodyData = await request.json()
   // console.log("update bodyData = "+JSON.stringify(bodyData))
-  console.log("update bodyData stepId= "+bodyData.stepId)
+  console.log("last step 传入的stepId= "+bodyData.stepId)
 
   try{
   // const infoData = await prisma.sudokuInfo.findUnique({
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   const stepRecord = await prisma.stepRecord.findUnique({
       where:{
-        id:bodyData.stepId-1
+        id:bodyData.stepId
       }
   })
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   // })
   // console.log("POST findUnique after "+data2?.id+", "+data2?.sudokuInfoId)
 
-  console.log("prisma after create record "+stepRecord?.id+", "+stepRecord?.sudokuInfoId)
+  console.log("prisma after last step "+stepRecord?.id+", "+stepRecord?.valueNow+", "+stepRecord?.valuePre)
     return NextResponse.json({ "data": stepRecord }, { status: 200 })
   } catch(error){
     console.error('创建数据时发生错误:', error);
